@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Attendance</title>
+</head>
+<body>
+    <h1>Add a New Attendance</h1>
+    <form method="POST">
+        <label for="student_id">Student ID:</label>
+        <input type="text" id="student_id" name="student_id" required>
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <button type="submit">Submit</button>
+    </form>
+    <br>
+    <table border="1">
+      <tr>
+        <td>ID</td>
+        <td>Student ID</td>
+        <td>Student Name</td>
+        <td>Check-in time</td>
+      </tr>
+      {% for student_attendance in student_attendances%}
+      <tr>
+        <td>{{student_attendance['id']}}</td>
+        <td>{{student_attendance['student_id']}}</td>
+        <td>{{student_attendance['name']}}</td>
+        <td>{{student_attendance['created_at']}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+</body>
+</html>
