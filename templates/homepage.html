@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Attendance</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Add a New Attendance</h1>
-    <form method="POST">
+    <form method="POST" >
         <label for="student_id">Student ID:</label>
         <input type="text" id="student_id" name="student_id" required>
         <label for="name">Name:</label>
@@ -15,7 +16,7 @@
         <button type="submit">Submit</button>
     </form>
     <br>
-    <table border="1">
+    <table border="1" style="width: 100%;">
       <tr>
         <td>ID</td>
         <td>Student ID</td>
@@ -24,12 +25,112 @@
       </tr>
       {% for student_attendance in student_attendances%}
       <tr>
-        <td>{{student_attendance['id']}}</td>
-        <td>{{student_attendance['student_id']}}</td>
-        <td>{{student_attendance['name']}}</td>
-        <td>{{student_attendance['created_at']}}</td>
+        <td id="id-{{student_attendance['id']}}">{{loop.index}}</td>
+        <td id="student-id-{{student_attendance['id']}}" style="padding-right: 8px;">{{student_attendance['student_id']}}</td>
+        <td id="name-{{student_attendance['id']}}" style="padding-right: 8px;">{{student_attendance['name']}}</td>
+        <td id="time-{{student_attendance['id']}}">{{student_attendance['created_at']}}</td>
+        <td id="button-container" style="width: 120px;">
+          <button type="button" id="edit-{{student_attendance['id']}}" onclick="onEditButtonClick('{{student_attendance['id']}}')">Edit</button>
+          <button type="button" id="delete-{{student_attendance['id']}}" onclick="onDeleteButtonClick('{{student_attendance['id']}}')">Delete</button>
+          <button 
+            type="button" 
+            id="save-{{student_attendance['id']}}" 
+            style="display:none;" 
+            onclick="submitEdit('{{student_attendance['id']}}')"
+          >
+            Save
+          </button>
+          <button 
+            type="button" 
+            id="cancel-{{student_attendance['id']}}" 
+            style="display:none;" 
+            onclick="cancelEdit('{{student_attendance['id']}}', '{{student_attendance['student_id']}}', '{{student_attendance['name']}}')"
+          >
+            Cancel
+          </button>
+        </td>
       </tr>
       {% endfor %}
     </table>
+
+    <script>
+      function onEditButtonClick(id) {
+        const studentIdRow = document.getElementById('student-id-' + id);
+        const nameRow = document.getElementById('name-' + id);
+
+        const buttonContainer = document.getElementById('button-container');
+        const editButton = document.getElementById('edit-' + id);
+        const deleteButton = document.getElementById('delete-' + id);
+        const saveEditButton = document.getElementById('save-' + id);
+        const cancelEditButton = document.getElementById('cancel-' + id);
+
+        studentIdRow.innerHTML = `<input style="width: 100%; border-color: blue; border-style: solid;" type="text" id="student_id_${id}" name="student_id" value="${studentIdRow.innerText}">`;
+        nameRow.innerHTML = `<input style="width: 100%; border-color: blue; border-style: solid;" type="text" id="name_${id}" name="student_name" value="${nameRow.innerText}">`;
+
+        editButton.style.display = 'none';
+        deleteButton.style.display = 'none';
+        saveEditButton.style.display = 'inline';
+        cancelEditButton.style.display = 'inline';
+      };
+      function onDeleteButtonClick(id) {
+        $.ajax({
+          url: '/delete/' + id,
+          type: 'DELETE',
+          contentType: 'application/json',
+          success: function() {
+            location.reload();
+            alert('Attendance deleted successfully!');
+          },
+          error: function(err) {
+            alert('Error: Attendance delete failed!');
+            console.error('Error deleting attendance:', err);
+          }
+        })
+      };
+
+      function cancelEdit(id, studentId, name) {
+        const studentIdRow = document.getElementById('student-id-' + id);
+        const nameRow = document.getElementById('name-' + id);
+        
+        const editButton = document.getElementById('edit-' + id);
+        const deleteButton = document.getElementById('delete-' + id);
+        const saveEditButton = document.getElementById('save-' + id);
+        const cancelEditButton = document.getElementById('cancel-' + id);
+
+        studentIdRow.innerHTML = `<td id="student-id-${id}">${studentId}</td>`;
+        nameRow.innerHTML = `<td id="name-${id}">${name}</td>`;
+
+        editButton.style.display = 'inline';
+        deleteButton.style.display = 'inline';
+        saveEditButton.style.display = 'none';
+        cancelEditButton.style.display = 'none';
+      };
+      function submitEdit(id) {  
+        const studentId = document.getElementById('student_id_' + id).value;
+        const name = document.getElementById('name_' + id).value;
+
+        const editButton = document.getElementById('edit-' + id);
+        const saveEditButton = document.getElementById('save-' + id);
+        const cancelEditButton = document.getElementById('cancel-' + id);
+
+        $.ajax({
+          url: '/update/' + id,
+          type: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            student_id: studentId,
+            name: name
+          }),
+          success: function() {
+            location.reload();
+            alert('Attendance updated successfully!');
+          },
+          error: function(err) {
+            alert('Error: Attendance update failed!');
+            console.error('Error updating attendance:', err);
+          }
+        })
+      };
+    </script>
 </body>
 </html>
