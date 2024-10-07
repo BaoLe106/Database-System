@@ -16,6 +16,9 @@
       <button type="submit">Submit</button>
     </form>
     <br />
+    <h2>Search Attendance</h2>
+    <input type="text" id="search-input" placeholder="Search by Student ID or Name" onkeyup="searchAttendance()" />
+    <br /><br />
     <table border="1" style="width: 100%">
       <tr>
         <td>ID</td>
@@ -151,6 +154,22 @@
             console.error("Error updating attendance:", err);
           },
         });
+      }
+      function searchAttendance() {
+        const input = document.getElementById('search-input').value.toLowerCase();
+        const table = document.getElementById('attendance-table');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+          const studentId = rows[i].getElementsByTagName('td')[1].innerText.toLowerCase();
+          const studentName = rows[i].getElementsByTagName('td')[2].innerText.toLowerCase();
+          
+          if (studentId.includes(input) || studentName.includes(input)) {
+            rows[i].style.display = '';
+          } else {
+            rows[i].style.display = 'none';
+          }
+        }
       }
     </script>
   </body>
