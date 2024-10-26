@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}My Website{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/1118529d73.js" crossorigin="anonymous"></script>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/css/uikit.min.css" />
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.13/dist/js/uikit-icons.min.js"></script>
+  </head>
+  <body style="
+    height: 100%;
+    margin: 0;
+  "> 
+    <div style="
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh; 
+    ">
+      <header style="max-height: 40px">
+        <div style="
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 8px;
+        ">
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px; 
+          ">
+            <a href="/">
+              <h2 style="color: black">stu.mgt</h2>
+            </a>
+            <a href="/attendance">
+              <button className="bg-inherit">Attendance</button>
+            </a>
+            <a href="/student">
+              <button className="bg-inherit">Student</button>
+            </a>
+            <a href="/dept">
+              <button className="bg-inherit">Department</button>
+            </a>
+          </div>
+          <div>Button</div>
+        </div>
+      </header>
+
+      <main style="flex-grow: 1; padding: 16px">
+        <div style="display: flex; width: 100%; justify-content: center">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+
+      <footer>
+        <div style="
+          display: flex;
+          width: 100%;
+          justify-content: center;
+          height: 40px;
+          align-items: center;"
+        >
+          <p>©2024 stu.mgt. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  </body>
+  
+</html>

@@ -1,14 +1,14 @@
 from flask import Blueprint, request, render_template, redirect, url_for
-from HW2.db.db import get_db_connection
-from HW2.repos.attendance_repo import get_student_attendance, add_student_attendance, update_student_attendance, delete_student_attendance
+from db.db import get_db_connection
+from repos.attendance_repo import get_student_attendance, add_student_attendance, update_student_attendance, delete_student_attendance
 
 attendance_routes = Blueprint('attendance_routes', __name__, url_prefix='/attendance')
 
 @attendance_routes.route('/', methods=['GET'])
 def get_student_attendance_route():
-	db_conn = get_db_connection()
-	student_attendances = get_student_attendance(db_conn)
-	return render_template('attendance.html', student_attendances=student_attendances)
+    db_conn = get_db_connection()
+    student_attendances = get_student_attendance(db_conn)
+    return render_template('attendance.html', student_attendances=student_attendances)
 
 @attendance_routes.route("/", methods=['POST'])
 def add_student_attendance_route():
@@ -17,10 +17,10 @@ def add_student_attendance_route():
 
     student_id = req['student_id']
     name = req['name']
-
+    
     res = add_student_attendance(db_conn, student_id, name)
     if res:
-        return redirect(url_for('home'))
+        return redirect(url_for('attendance_routes.get_student_attendance_route'))
     
     return None
 

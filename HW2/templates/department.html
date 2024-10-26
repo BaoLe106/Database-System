@@ -1,0 +1,302 @@
+{% extends "main_layout.html" %}
+
+{% block title %}Department{% endblock %}
+
+{% block content %}
+<div style="width: 80%;">
+  <h2>Department</h2>
+  
+  <div id="notification" style="display: none;"></div>
+  <form id="form" method="POST" onsubmit="handleSubmitForm(event)">
+    <div style="display: flex; align-content: center;">
+      <div style="display: flex; gap: 16px;">
+        <div>
+          <label for="dept_id">Department ID:</label>
+          <input
+            style="max-width: 200px;"
+            class="input-field"
+            type="text"
+            id="dept_id"
+            name="dept_id"
+            required
+          />
+        </div>
+        <div>
+          <label for="name">Department name:</label>
+          <input class="input-field" type="text" id="name" name="name" required />
+        </div>
+        <div>
+          <label for="num_of_faculty">Number of faculty:</label>
+          <input type="number" class="input-field" id="num_of_faculty" name="num_of_faculty" required />
+        </div>
+      </div>
+      
+    </div>
+    <button class="submit-button" type="submit">Submit</button>
+  </form>
+  <br/>
+  {% if depts|length > 0 %}
+    <table border="1" class="table-class">
+      <thead>
+        <tr>
+          <td>ID</td>
+          <td>Department ID</td>
+          <td>Department name</td>
+          <td>Number of faculty</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dept in depts%}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td 
+            id="id-{{dept['id']}}"
+            style="padding-right: 8px"
+          >
+            {{dept['dept_id']}}
+          </td>
+          <td 
+            id="name-{{dept['id']}}"
+            style="padding-right: 8px"
+          >
+            {{dept['name']}}
+          </td>
+          <td id="faculty-{{dept['id']}}" style="width: 240px;">
+            {{dept['num_of_faculty']}}
+          </td>
+          <td style="width: 50px; ">
+            <div id="button-{{dept['id']}}" style="display: flex; justify-content: space-between; justify-self: center;">
+              <i 
+                class="fa-regular fa-pen-to-square" 
+                style="cursor: pointer; margin-right: 8px;" 
+                type="button"
+                onclick="onEditButtonClick('{{dept['id']}}')"
+              ></i>
+              <i 
+                class="fa-solid fa-trash"
+                style="cursor: pointer;" 
+                type="button"
+                uk-toggle="target: #modal-center"
+                onclick="storeRecordId('{{dept['id']}}')"
+              ></i>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No departments available.</p>
+  {% endif %}
+  <div id="modal-center" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical"">
+      <h2 style="justify-self: center;">Delete this record?</h2>
+      <p class="uk-text-right">
+        <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+        <button class="uk-button uk-button-danger" type="button" onclick="onDeleteButtonClick()">Delete</button>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  var initButtonContainerInnerHTML;
+  var initDeptIdRowInnerHTML;
+  var initNameRowInnerHTML;
+  var initFacultyRowInnerHTML;
+  var currentRecordId;
+
+  function storeRecordId(id) {
+    currentRecordId = id;
+  }
+
+  async function handleSubmitForm(event) {
+    event.preventDefault(); // Prevent the form from submitting the traditional way
+
+    const form = document.getElementById('form');
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        const notification = document.getElementById('notification');
+        const deptIdContainer = document.getElementById('dept_id');
+        const deptNameContainer = document.getElementById('name');
+        const deptNumOfFacultyContainer = document.getElementById('num_of_faculty')
+
+        deptIdContainer.value = "";
+        deptNameContainer.value = "";
+        deptNumOfFacultyContainer.value = "";
+
+        notification.style = `
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          padding: 8px;
+          background-color: rgb(255, 215, 222);
+          color: red; 
+          font-weight: bold;
+        `;
+        notification.innerHTML = `
+          <p style="text-align: center; margin: 0 !important;">${errorData.error || 'An error occurred'}</p>
+          <i 
+            class="fa-regular fa-circle-xmark" 
+            type="button"
+            onclick="closeNotification()"
+          ></i>
+        `
+        // 
+      } else {
+        // If successful, reload the page or update the UI as needed
+        window.location.href = "{{ url_for('dept_routes.get_all_dept_route') }}";
+      }
+    } catch (error) {
+      notification.style.display = 'block';
+      notification.innerText = 'An error occurred while submitting the form.';
+      console.error('Submission error:', error);
+    }
+  }
+
+  function closeNotification() {
+    const notification = document.getElementById('notification');
+    notification.style.display = 'none';
+  }
+
+  function onEditButtonClick(id) {
+    const buttonContainer = document.getElementById("button-" + id)    
+    const deptIdRow = document.getElementById("id-" + id);
+    const nameRow = document.getElementById("name-" + id);    
+    const facultyRow = document.getElementById("faculty-" + id);
+    
+    initButtonContainerInnerHTML = buttonContainer.innerHTML;
+    initDeptIdRowInnerHTML = deptIdRow.innerHTML;
+    initNameRowInnerHTML = nameRow.innerHTML;
+    initFacultyRowInnerHTML = facultyRow.innerHTML;
+   
+    buttonContainer.innerHTML = `
+      <i 
+        class="fa-solid fa-check"
+        style="cursor: pointer; margin-right: 8px" 
+        type="button"
+        onclick="submitEdit(${id})"
+      ></i>
+      <i 
+        class="fa-solid fa-xmark"
+        style="cursor: pointer;" 
+        type="button"
+        onclick="closeEdit(${id})"
+      ></i>
+    `;
+
+    deptIdRow.innerHTML = `
+      <input 
+        style="width: 100px;"
+        class="input-field"
+        type="text" 
+        id="id-input-${id}" 
+        value="${deptIdRow.innerText}"
+      >
+    `;
+
+    nameRow.innerHTML = `
+      <input 
+        style="width: 180px;"
+        class="input-field"
+        type="text" 
+        id="name-input-${id}" 
+        value="${nameRow.innerText}"
+      >
+    `;
+
+    facultyRow.innerHTML = `
+      <input 
+        style="width: 60px;"
+        class="input-field"
+        type="number" 
+        id="faculty-input-${id}" 
+        value="${facultyRow.innerText}"
+      >
+    `; 
+  }
+
+  function submitEdit(id) {
+    const buttonContainer = document.getElementById("button-" + id)
+    const deptId = document.getElementById("id-input-" + id).value;
+    const name = document.getElementById("name-input-" + id).value;
+    const numOfFaculty = document.getElementById("faculty-input-" + id).value;
+    console.log("debug deptId", deptId)
+    $.ajax({
+      url: "/dept/update/" + id,
+      type: "PUT",
+      contentType: "application/json",
+      data: JSON.stringify({
+        dept_id: deptId,
+        name: name,
+        num_of_faculty: numOfFaculty
+      }),
+      success: function () {
+        location.reload();
+        // alert("Attendance updated successfully!");
+      },
+      error: function (err) {
+        const notification = document.getElementById('notification');
+        notification.style = `
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          padding: 8px;
+          background-color: rgb(255, 215, 222);
+          color: red; 
+          font-weight: bold;
+        `;
+
+        notification.innerHTML = `
+          <p style="text-align: center; margin: 0 !important;">${err.responseJSON.error || 'An error occurred'}</p>
+          <i 
+            class="fa-regular fa-circle-xmark" 
+            type="button"
+            onclick="closeNotification()"
+          ></i>
+        `
+        closeEdit(id);
+      },
+    });
+  }
+
+  function closeEdit(id) {
+    const buttonContainer = document.getElementById("button-" + id)
+    const deptIdRow = document.getElementById("id-" + id);
+    const nameRow = document.getElementById("name-" + id);
+    const facultyRow = document.getElementById("faculty-" + id);
+
+    buttonContainer.innerHTML = initButtonContainerInnerHTML;
+    deptIdRow.innerHTML = initDeptIdRowInnerHTML;
+    nameRow.innerHTML = initNameRowInnerHTML;
+    facultyRow.innerHTML = initFacultyRowInnerHTML;
+  }
+
+  function onDeleteButtonClick() {
+    $.ajax({
+      url: "/dept/delete/" + currentRecordId,
+      type: "DELETE",
+      contentType: "application/json",
+      success: function () {
+        location.reload();
+        // alert("Attendance deleted successfully!");
+      },
+      error: function (err) {
+        alert("Error: Department delete failed!");
+        console.error("Error deleting department:", err);
+      },
+    });
+  }
+</script>
+{% endblock %}

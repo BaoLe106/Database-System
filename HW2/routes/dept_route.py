@@ -1,6 +1,6 @@
-from flask import Blueprint, request, render_template, redirect, url_for
-from HW2.db.db import get_db_connection
-from HW2.repos.dept_repo import get_all_dept, add_dept, update_dept, delete_dept
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for
+from db.db import get_db_connection
+from repos.dept_repo import get_all_dept, add_dept, update_dept, delete_dept
 
 dept_routes = Blueprint('dept_routes', __name__, url_prefix='/dept')
 
@@ -17,12 +17,13 @@ def add_dept_route():
 
     dept_id = req['dept_id']
     name = req['name']
+    num_of_faculty = req['num_of_faculty']
 
-    res = add_dept(db_conn, dept_id, name)
+    res, error_message = add_dept(db_conn, dept_id, name, num_of_faculty)
     if res:
-        return redirect(url_for('get_all_dept_route'))
+        return redirect(url_for('dept_routes.get_all_dept_route'))
     
-    return None
+    return jsonify({"error": error_message}), 400
 
 @dept_routes.route("/update/<id>", methods=['PUT'])
 def update_dept_route(id):
@@ -30,12 +31,12 @@ def update_dept_route(id):
     req = request.get_json()
     dept_id = req['dept_id']
     name = req['name']
+    num_of_faculty = req['num_of_faculty']
 
-    res = update_dept(db_conn, id, dept_id, name)
+    res, error_message = update_dept(db_conn, id, dept_id, name, num_of_faculty)
     if res:
         return {}, 204
-    else:
-        return {}, 400
+    return jsonify({"error": error_message}), 400
 
 @dept_routes.route("/delete/<id>", methods=['DELETE'])
 def delete_dept_route(id):
