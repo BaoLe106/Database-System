@@ -17,7 +17,7 @@ def get_all_dept(db_conn):
     
 def add_dept(db_conn, dept_id, name, num_of_faculty):
     try:
-        cur = db_conn.cursor()
+        cur = db_conn.cursor(buffered=True)
 
         check_dept_query_for_id = 'SELECT id FROM department WHERE dept_id = %s'
         cur.execute(check_dept_query_for_id, (dept_id,))
@@ -44,7 +44,7 @@ def add_dept(db_conn, dept_id, name, num_of_faculty):
 
 def update_dept(db_conn, id, dept_id, name, num_of_faculty):
     try:
-        cur = db_conn.cursor()
+        cur = db_conn.cursor(buffered=True)
 
         check_dept_query_for_id = 'SELECT id FROM department WHERE id != %s AND dept_id = %s'
         cur.execute(check_dept_query_for_id, (id, dept_id,))

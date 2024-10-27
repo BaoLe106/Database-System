@@ -44,5 +44,5 @@ def delete_dept_route(id):
     res = delete_dept(db_conn, id)
     if res:
         return {}, 204
-    else:
-        return {}, 400
+
+    return {}, 400

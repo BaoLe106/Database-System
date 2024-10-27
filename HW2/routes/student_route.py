@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, redirect, url_for
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for
 from db.db import get_db_connection
 from repos.student_repo import get_all_student, add_student, update_student, delete_student
 
@@ -20,31 +20,34 @@ def add_student_route():
     dept_id = req['dept_id']
     dob = req['dob']
 
-    res = add_student(db_conn, student_id, name, dept_id, dob)
+    res, error_message = add_student(db_conn, student_id, name, dept_id, dob)
     if res:
-        return redirect(url_for('student_routes.get_all_student_route'))
+        return jsonify({"message": "Add OK"}), 201
     
-    return None
+    return jsonify({"error": error_message}), 400
 
 @student_routes.route("/update/<id>", methods=['PUT'])
 def update_student_route(id):
     db_conn = get_db_connection()
     req = request.get_json()
+    print("debug req", req)
+
+    student_id = req['student_id']
     name = req['name']
     dept_id = req['dept_id']
     dob = req['dob']
-
-    res = update_student(db_conn, id, dept_id, name, dob)
+    
+    res, error_message = update_student(db_conn, id, student_id, name, dept_id, dob)
     if res:
-        return {}, 204
-    else:
-        return {}, 400
+        return jsonify({"message": "Update OK"}), 204
+
+    return jsonify({"error": error_message}), 400
 
 @student_routes.route("/delete/<id>", methods=['DELETE'])
 def delete_student_route(id):
     db_conn = get_db_connection()
     res = delete_student(db_conn, id)
     if res:
-        return {}, 204
-    else:
-        return {}, 400
+        return jsonify({"message": "Delete OK"}), 204
+    
+    return {}, 400

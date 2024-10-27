@@ -3,8 +3,49 @@
 {% block title %}Student Management{% endblock %}
 
 {% block content %}
-<div>
-  <h2>Page 1 Content</h2>
-  <p>This is the content of Page 1.</p>
+<div style="width: 80%; margin-top: 16px;">
+  <h2>Students' overall attendance record</h2>
+  {% if data|length > 0 %}
+    <table border="1" class="table-class" style="width: 100% !important;">
+      <thead>
+        <tr>
+          <td>ID</td>
+          <td>Student ID</td>
+          <td>Student name</td>
+          <td>Department ID</td>
+          <td>Department name</td>
+          <td>Latest attendance</td>
+          <td>Attendance count</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in data%}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td id="id-{{d['id']}}">
+            {{d['student_id']}}
+          </td>
+          <td id="name-{{d['id']}}">
+            {{d['student_name']}}
+          </td>
+          <td id="dept-id-{{d['id']}}">
+            {{d['dept_id']}}
+          </td>
+          <td id="dept-name-{{d['id']}}">
+            {{d['department_name']}}
+          </td>
+          <td id="last-attendance-{{d['id']}}">
+            {{d['latest_attendance']}}
+          </td>
+          <td id="attendance-count-{{d['id']}}">
+            {{d['attendance_count']}}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No data available.</p>
+  {% endif %}
 </div>
 {% endblock %}

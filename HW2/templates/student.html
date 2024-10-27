@@ -3,15 +3,30 @@
 {% block title %}Student{% endblock %}
 
 {% block content %}
-<div style="width: 80%;">
-  <h2>Student</h2>
+<div style="width: 80%; margin-top: 16px;">
+  <h2>Student Info</h2>
   
   <div id="notification" style="display: none;"></div>
   <form id="form" method="POST" onsubmit="handleSubmitForm(event)">
     <div style="display: flex; align-content: center;">
       <div style="display: flex; gap: 16px;">
         <div>
-          <label for="dept_id">Student ID:</label>
+          <label for="student_id">Student ID:</label>
+          <input
+            style="max-width: 200px;"
+            class="input-field"
+            type="text"
+            id="student_id"
+            name="student_id"
+            required
+          />
+        </div>
+        <div>
+          <label for="name">Student name:</label>
+          <input class="input-field" type="text" id="name" name="name" required />
+        </div>
+        <div>
+          <label for="dept_id">Department ID:</label>
           <input
             style="max-width: 200px;"
             class="input-field"
@@ -22,12 +37,8 @@
           />
         </div>
         <div>
-          <label for="name">Student name:</label>
-          <input class="input-field" type="text" id="name" name="name" required />
-        </div>
-        <div>
-          <label for="num_of_faculty">Number of faculty:</label>
-          <input type="number" class="input-field" id="num_of_faculty" name="num_of_faculty" required />
+          <label for="num_of_faculty">Date of birth:</label>
+          <input class="input-field" type="date" id="dob" name="dob" required/>
         </div>
       </div>
       
@@ -35,49 +46,53 @@
     <button class="submit-button" type="submit">Submit</button>
   </form>
   <br/>
-  {% if depts|length > 0 %}
+  {% if students|length > 0 %}
     <table border="1" class="table-class">
       <thead>
         <tr>
           <td>ID</td>
+          <td>Student ID</td>
+          <td>Student name</td>
           <td>Department ID</td>
-          <td>Department name</td>
-          <td>Number of faculty</td>
+          <td>Date of Birth</td>
         </tr>
       </thead>
       <tbody>
-        {% for dept in depts%}
+        {% for student in students%}
         <tr>
           <td>{{loop.index}}</td>
           <td 
-            id="id-{{dept['id']}}"
+            id="id-{{student['id']}}"
             style="padding-right: 8px"
           >
-            {{dept['dept_id']}}
+            {{student['student_id']}}
           </td>
           <td 
-            id="name-{{dept['id']}}"
-            style="padding-right: 8px"
+            id="name-{{student['id']}}"
+            style="padding-right: 8px; width: 160px;"
           >
-            {{dept['name']}}
+            {{student['name']}}
           </td>
-          <td id="faculty-{{dept['id']}}" style="width: 240px;">
-            {{dept['num_of_faculty']}}
+          <td id="dept-{{student['id']}}" style="width: 160px;">
+            {{student['dept_id']}}
+          </td>
+          <td id="dob-{{student['id']}}">
+            {{ student['dob'].strftime("%Y-%m-%d") }}
           </td>
           <td style="width: 50px; ">
-            <div id="button-{{dept['id']}}" style="display: flex; justify-content: space-between; justify-self: center;">
+            <div id="button-{{student['id']}}" style="display: flex; justify-content: space-between; justify-self: center;">
               <i 
                 class="fa-regular fa-pen-to-square" 
                 style="cursor: pointer; margin-right: 8px;" 
                 type="button"
-                onclick="onEditButtonClick('{{dept['id']}}')"
+                onclick="onEditButtonClick('{{student['id']}}')"
               ></i>
               <i 
                 class="fa-solid fa-trash"
                 style="cursor: pointer;" 
                 type="button"
                 uk-toggle="target: #modal-center"
-                onclick="storeRecordId('{{dept['id']}}')"
+                onclick="storeRecordId('{{student['id']}}')"
               ></i>
             </div>
           </td>
@@ -101,9 +116,10 @@
 
 <script>
   var initButtonContainerInnerHTML;
-  var initDeptIdRowInnerHTML;
+  var initStudentIdRowInnerHTML;  
   var initNameRowInnerHTML;
-  var initFacultyRowInnerHTML;
+  var initDeptIdRowInnerHTML;
+  var initDobInnerHTML;
   var currentRecordId;
 
   function storeRecordId(id) {
@@ -124,15 +140,17 @@
 
       if (!response.ok) {
         const errorData = await response.json();
-
+        
         const notification = document.getElementById('notification');
+        const studentIdContainer = document.getElementById('student_id');
         const deptIdContainer = document.getElementById('dept_id');
-        const deptNameContainer = document.getElementById('name');
-        const deptNumOfFacultyContainer = document.getElementById('num_of_faculty')
+        const studentNameContainer = document.getElementById('name');
+        const dobContainer = document.getElementById('dob');
 
+        studentIdContainer.value = "";
         deptIdContainer.value = "";
-        deptNameContainer.value = "";
-        deptNumOfFacultyContainer.value = "";
+        studentNameContainer.value = "";
+        dobContainer.value = "";
 
         notification.style = `
           display: flex;
@@ -151,11 +169,11 @@
             type="button"
             onclick="closeNotification()"
           ></i>
-        `
+        `;
         // 
       } else {
         // If successful, reload the page or update the UI as needed
-        window.location.href = "{{ url_for('dept_routes.get_all_dept_route') }}";
+        window.location.href = "{{ url_for('student_routes.get_all_student_route') }}";
       }
     } catch (error) {
       notification.style.display = 'block';
@@ -170,16 +188,24 @@
   }
 
   function onEditButtonClick(id) {
-    const buttonContainer = document.getElementById("button-" + id)    
-    const deptIdRow = document.getElementById("id-" + id);
+    const buttonContainer = document.getElementById("button-" + id);
+    const studentIdRow = document.getElementById("id-" + id);
+    const deptIdRow = document.getElementById("dept-" + id);
     const nameRow = document.getElementById("name-" + id);    
-    const facultyRow = document.getElementById("faculty-" + id);
-    
+    const dobRow = document.getElementById("dob-" + id);
+
+    initStudentIdRowInnerHTML = studentIdRow.innerHTML;
     initButtonContainerInnerHTML = buttonContainer.innerHTML;
     initDeptIdRowInnerHTML = deptIdRow.innerHTML;
     initNameRowInnerHTML = nameRow.innerHTML;
-    initFacultyRowInnerHTML = facultyRow.innerHTML;
+    initDobInnerHTML = dobRow.innerHTML;
    
+    const date = new Date(dobRow.innerText);
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const formattedDate = `${year}-${month}-${day}`;
+
     buttonContainer.innerHTML = `
       <i 
         class="fa-solid fa-check"
@@ -195,19 +221,19 @@
       ></i>
     `;
 
-    deptIdRow.innerHTML = `
+    studentIdRow.innerHTML = `
       <input 
-        style="width: 100px;"
+        style="width: 120px;"
         class="input-field"
         type="text" 
         id="id-input-${id}" 
-        value="${deptIdRow.innerText}"
+        value="${studentIdRow.innerText}"
       >
     `;
 
     nameRow.innerHTML = `
       <input 
-        style="width: 180px;"
+        style="width: 160px;"
         class="input-field"
         type="text" 
         id="name-input-${id}" 
@@ -215,31 +241,43 @@
       >
     `;
 
-    facultyRow.innerHTML = `
+    deptIdRow.innerHTML = `
       <input 
-        style="width: 60px;"
+        style="width: 100px;"
         class="input-field"
-        type="number" 
-        id="faculty-input-${id}" 
-        value="${facultyRow.innerText}"
+        type="text" 
+        id="dept-input-${id}" 
+        value="${deptIdRow.innerText}"
+      >
+    `;
+
+    dobRow.innerHTML = `
+      <input 
+        style="width: 120px;"
+        class="input-field"
+        type="date" 
+        id="dob-input-${id}" 
+        value="${formattedDate}"
       >
     `; 
   }
 
   function submitEdit(id) {
-    const buttonContainer = document.getElementById("button-" + id)
-    const deptId = document.getElementById("id-input-" + id).value;
+    const buttonContainer = document.getElementById("button-" + id);
+    const studentId = document.getElementById("id-input-" + id).value;
+    const deptId = document.getElementById("dept-input-" + id).value;
     const name = document.getElementById("name-input-" + id).value;
-    const numOfFaculty = document.getElementById("faculty-input-" + id).value;
-    console.log("debug deptId", deptId)
+    const dob = document.getElementById("dob-input-" + id).value;
+
     $.ajax({
-      url: "/dept/update/" + id,
+      url: "/student/update/" + id,
       type: "PUT",
       contentType: "application/json",
       data: JSON.stringify({
+        student_id: studentId,
         dept_id: deptId,
         name: name,
-        num_of_faculty: numOfFaculty
+        dob: dob
       }),
       success: function () {
         location.reload();
@@ -272,20 +310,22 @@
   }
 
   function closeEdit(id) {
-    const buttonContainer = document.getElementById("button-" + id)
-    const deptIdRow = document.getElementById("id-" + id);
-    const nameRow = document.getElementById("name-" + id);
-    const facultyRow = document.getElementById("faculty-" + id);
+    const buttonContainer = document.getElementById("button-" + id);
+    const studentIdRow = document.getElementById("id-" + id);
+    const deptIdRow = document.getElementById("dept-" + id);
+    const nameRow = document.getElementById("name-" + id);    
+    const dobRow = document.getElementById("dob-" + id);
 
     buttonContainer.innerHTML = initButtonContainerInnerHTML;
+    studentIdRow.innerHTML = initStudentIdRowInnerHTML;
     deptIdRow.innerHTML = initDeptIdRowInnerHTML;
     nameRow.innerHTML = initNameRowInnerHTML;
-    facultyRow.innerHTML = initFacultyRowInnerHTML;
+    dobRow.innerHTML = initDobInnerHTML;
   }
 
   function onDeleteButtonClick() {
     $.ajax({
-      url: "/dept/delete/" + currentRecordId,
+      url: "/student/delete/" + currentRecordId,
       type: "DELETE",
       contentType: "application/json",
       success: function () {
@@ -293,8 +333,8 @@
         // alert("Attendance deleted successfully!");
       },
       error: function (err) {
-        alert("Error: Department delete failed!");
-        console.error("Error deleting department:", err);
+        alert("Error: Student delete failed!");
+        console.error("Error deleting student:", err);
       },
     });
   }
