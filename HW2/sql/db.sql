@@ -16,7 +16,8 @@ CREATE TABLE student_info (
   dob DATETIME NOT NULL,
   UNIQUE (id),
   PRIMARY KEY (student_id),
-  UNIQUE (student_id)
+  UNIQUE (student_id),
+  FOREIGN KEY (dept_id) REFERENCES department(dept_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE department (
@@ -24,6 +25,7 @@ CREATE TABLE department (
   dept_id VARCHAR(20) PRIMARY KEY NOT NULL,
   name VARCHAR(255) NOT NULL,
   num_of_faculty INT DEFAULT 0,
-  UNIQUE(dept_id)
+  UNIQUE(dept_id),
+  FOREIGN KEY (student_id) REFERENCES student_info(student_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
