@@ -5,7 +5,7 @@ CREATE TABLE student_attendance (
   student_id VARCHAR(20) NOT NULL,
   name VARCHAR(255) NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (id)
+  UNIQUE (student_id)
 );
 
 CREATE TABLE student_info (
@@ -24,6 +24,6 @@ CREATE TABLE department (
   dept_id VARCHAR(20) PRIMARY KEY NOT NULL,
   name VARCHAR(255) NOT NULL,
   num_of_faculty INT DEFAULT 0,
-  UNIQUE(id)
+  UNIQUE(dept_id)
 );
 
