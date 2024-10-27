@@ -10,5 +10,8 @@
 
 ![img3](https://github.com/BaoLe106/Database-System/blob/main/HW2/img_for_readme/image4.png?raw=true)
 
+## Video
+[HW2 video](https://youtu.be/LbTDTDxrDuk)
+
 ## ER Diagram
 ![er_diagram](https://github.com/BaoLe106/Database-System/blob/main/HW2/er_model/ER_Diagram.png?raw=true)
