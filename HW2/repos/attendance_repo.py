@@ -17,7 +17,7 @@ def get_student_attendance(db_conn):
     
 def add_student_attendance(db_conn, student_id, name):
     try:
-        cur = db_conn.cursor()
+        cur = db_conn.cursor(buffered=True)
 
         post_query = 'INSERT INTO student_attendance (student_id, name) VALUES (%s, %s)'
         cur.execute(post_query, (student_id, name))
@@ -34,7 +34,7 @@ def add_student_attendance(db_conn, student_id, name):
 
 def update_student_attendance(db_conn, id, student_id, name):
     try:
-        cur = db_conn.cursor()
+        cur = db_conn.cursor(buffered=True)
 
         update_query = 'UPDATE student_attendance SET student_id = %s, name = %s WHERE id = %s'
         cur.execute(update_query, (student_id, name, id))

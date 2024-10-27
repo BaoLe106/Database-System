@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, redirect, url_for
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for
 from db.db import get_db_connection
 from repos.attendance_repo import get_student_attendance, add_student_attendance, update_student_attendance, delete_student_attendance
 
@@ -17,12 +17,12 @@ def add_student_attendance_route():
 
     student_id = req['student_id']
     name = req['name']
-    
+
     res = add_student_attendance(db_conn, student_id, name)
     if res:
-        return redirect(url_for('attendance_routes.get_student_attendance_route'))
+        return jsonify({"message": "Add OK"}), 201
     
-    return None
+    return jsonify({"error": "Add error"}), 400
 
 @attendance_routes.route("/update/<id>", methods=['PUT'])
 def update_student_attendance_route(id):
@@ -33,15 +33,15 @@ def update_student_attendance_route(id):
 
     res = update_student_attendance(db_conn, id, student_id, name)
     if res:
-        return {}, 204
-    else:
-        return {}, 400
+        return jsonify({"message": "Update OK"}), 204
+
+    return jsonify({"error": "Update error"}), 400
 
 @attendance_routes.route("/delete/<id>", methods=['DELETE'])
 def delete_student_attendance_route(id):
     db_conn = get_db_connection()
     res = delete_student_attendance(db_conn, id)
     if res:
-        return {}, 204
-    else:
-        return {}, 400
+        return jsonify({"message": "Delete OK"}), 204
+
+    return jsonify({"error": "Delete error"}), 400
