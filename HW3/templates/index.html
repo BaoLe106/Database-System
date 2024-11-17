@@ -441,8 +441,6 @@
             formData.append("files", file); // Append each file to FormData
         });
 
-        console.log("Files being submitted:", files);
-
         // Make an AJAX request to submit the files
         fetch("/upload", {
             method: "POST",
@@ -450,6 +448,7 @@
         })
             .then((response) => {
                 if (!response.ok) alert("Failed to upload files.");
+                window.location.reload();
             })
             .catch((error) => {
                 alert("Failed to upload files.");
