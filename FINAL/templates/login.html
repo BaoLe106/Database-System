@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/franken-ui@1.1.0/dist/css/core.min.css"
+    />
+    <script
+      src="https://unpkg.com/franken-ui@1.1.0/dist/js/core.iife.js"
+      type="module"
+    ></script>
+    <script
+      src="https://unpkg.com/franken-ui@1.1.0/dist/js/icon.iife.js"
+      type="module"
+    ></script>
+    <script
+      src="https://kit.fontawesome.com/1118529d73.js"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const htmlElement = document.documentElement;
+
+      if (
+        localStorage.getItem("mode") === "dark" ||
+        (!("mode" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        htmlElement.classList.add("dark");
+      } else {
+        htmlElement.classList.remove("dark");
+      }
+
+      htmlElement.classList.add(
+        localStorage.getItem("theme") || "uk-theme-zinc"
+      );
+    </script>
+
+    <title>Music Player</title>
+  </head>
+  <body class="bg-background text-foreground">
+    <div
+      class="uk-container uk-container-expand"
+      style="
+        display: grid;
+        height: 100vh;
+        padding: 0px;
+        margin: 0 32px !important;
+      "
+    >
+      <div
+        class="uk-width-1-3@m uk-height-max-large uk-card"
+        style="justify-self: center; align-self: center"
+      >
+        <div class="uk-card-header" style="justify-self: center">
+          <h1 class="uk-card-title" style="font-size: 2em">
+            Welcome to music player
+          </h1>
+          <p
+            class="uk-margin-xsmall-top uk-text-small text-muted-foreground"
+            style="justify-self: center"
+          >
+            Enter your username and password below to login
+          </p>
+        </div>
+        <div class="uk-card-body">
+          <div class="">
+            <!-- <label class="uk-form-label" for="name">Username</label> -->
+            <div class="uk-form-controls uk-margin-xsmall-top">
+              <input
+                class="uk-input"
+                id="username"
+                type="text"
+                placeholder="Username"
+              />
+              <!-- <div
+                id="name-help-block"
+                class="uk-form-help uk-margin-xsmall-top"
+              >
+                The name of your project.
+              </div> -->
+            </div>
+          </div>
+
+          <div class="uk-margin">
+            <!-- <label class="uk-form-label" for="framework">Password</label> -->
+            <div class="uk-form-controls uk-margin-xsmall-top">
+              <div
+                class="uk-form-controls uk-margin-xsmall-top"
+                style="position: relative"
+              >
+                <input
+                  class="uk-input"
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                  style="padding-right: 36px"
+                />
+                <button
+                  class="uk-form-icon"
+                  style="right: 0; left: auto"
+                  onclick="togglePasswordVisibility()"
+                >
+                  <uk-icon id="icon-password" icon="eye"></uk-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="uk-card-footer uk-flex uk-flex-between">
+            <!-- <button class="uk-button uk-button-default">Cancel</button> -->
+            <button
+              class="uk-button uk-button-primary"
+              style="width: 100%"
+              onclick="login()"
+            >
+              Login
+            </button>
+          </div>
+          <div class="uk-flex">
+            <hr
+              style="
+                height: 1px;
+                flex: 1;
+                border: none;
+                margin: 16px;
+                background-color: #a1a1aa;
+              "
+            />
+            <span
+              class="uk-margin-xsmall-top uk-text-small text-muted-foreground"
+              style="justify-self: center"
+            >
+              OR
+              <a class="uk-link-text" href="/register">REGISTER</a>
+              HERE
+            </span>
+            <hr
+              style="
+                height: 1px;
+                flex: 1;
+                border: none;
+                margin: 16px;
+                background-color: #a1a1aa;
+              "
+            />
+          </div>
+          <br />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  function togglePasswordVisibility() {
+    const passwordInput = document.getElementById("password");
+    const toggleIcon = document.getElementById("icon-password");
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      toggleIcon.setAttribute("icon", "eye-off");
+    } else {
+      passwordInput.type = "password";
+      toggleIcon.setAttribute("icon", "eye");
+    }
+  }
+
+  function login() {
+    const userNameInputComponent = document.getElementById("username");
+    const passwordInputComponent = document.getElementById("password");
+
+    if (!userNameInputComponent || !passwordInputComponent) {
+      alert("Failed to login.");
+      return;
+    }
+
+    if (!userNameInputComponent.value || !passwordInputComponent.value) {
+      alert("Please fill in your username and/or password");
+      return;
+    }
+
+    // const encryptedPassword = CryptoJS.SHA256(
+    //   passwordInputComponent.value
+    // ).toString();
+
+    $.ajax({
+      url: "/api/login",
+      type: "POST",
+      contentType: "application/json",
+      data: JSON.stringify({
+        username: userNameInputComponent.value,
+        password: passwordInputComponent.value,
+      }),
+      success: function () {
+        window.location.href = "/";
+      },
+      error: function (err) {
+        alert("Failed to register.");
+      },
+    });
+  }
+</script>

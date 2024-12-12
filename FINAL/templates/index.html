@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/franken-ui@1.1.0/dist/css/core.min.css"
+    />
+    <script
+      src="https://unpkg.com/franken-ui@1.1.0/dist/js/core.iife.js"
+      type="module"
+    ></script>
+    <script
+      src="https://unpkg.com/franken-ui@1.1.0/dist/js/icon.iife.js"
+      type="module"
+    ></script>
+    <script
+      src="https://kit.fontawesome.com/1118529d73.js"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const htmlElement = document.documentElement;
+
+      if (
+        localStorage.getItem("mode") === "dark" ||
+        (!("mode" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        htmlElement.classList.add("dark");
+      } else {
+        htmlElement.classList.remove("dark");
+      }
+
+      htmlElement.classList.add(
+        localStorage.getItem("theme") || "uk-theme-zinc"
+      );
+    </script>
+
+    <title>Music Player</title>
+    <style>
+      #volume-slider {
+        -webkit-appearance: none;
+        height: 8px;
+        background: hsl(var(--primary) / 0.2);
+        border-radius: 5px;
+        outline: none;
+        cursor: pointer;
+      }
+
+      #volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        background: hsl(var(--foreground));
+        border-radius: 50%;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body class="bg-background text-foreground">
+    <div
+      class="uk-container uk-container-large uk-flex"
+      style="
+        width: 100vw;
+        padding: 0px;
+        margin: 0 32px !important;
+        justify-self: center;
+      "
+    >
+      <div
+        class="uk-width-1-4 uk-card uk-margin-top uk-card-body uk-card-default"
+        style="min-height: 85vh; margin-right: 8px"
+      >
+        <div class="uk-inline">
+          <button
+            class="uk-icon-button uk-icon-button-small uk-icon-button-outline"
+          >
+            <uk-icon icon="palette" uk-cloak></uk-icon>
+          </button>
+          <div
+            class="uk-card uk-card-body uk-card-default uk-drop uk-width-large"
+            uk-drop="mode: click; offset: 8"
+          >
+            <div class="uk-card-title uk-margin-medium-bottom">Customize</div>
+            <uk-theme-switcher></uk-theme-switcher>
+          </div>
+        </div>
+        <ul class="uk-nav-default" uk-nav>
+          <li class="uk-active">
+            <a>
+              <h1 class="uk-h3">{{ user.username }}</h1>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <uk-icon
+                custom-class="uk-margin-small-right"
+                icon="table"
+              ></uk-icon>
+              Item
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <uk-icon
+                custom-class="uk-margin-small-right"
+                icon="bell"
+              ></uk-icon>
+              Item
+            </a>
+          </li>
+          <!-- <li class="uk-nav-divider"></li> -->
+          <li>
+            <a href="#">
+              <uk-icon
+                custom-class="uk-margin-small-right"
+                icon="trash"
+              ></uk-icon>
+              Item
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="uk-width-3-4 uk-card uk-margin-top uk-card-body uk-card-default"
+        style="min-height: 85vh"
+      >
+        <h1 class="uk-h4" style="margin-bottom: 8px">Upload Music</h1>
+
+        <div class="js-upload" uk-form-custom style="display: flex">
+          <input
+            id="file-input"
+            type="file"
+            accept="audio/*"
+            multiple
+            style="width: 20%"
+          />
+          <button
+            class="uk-button uk-button-primary"
+            type="button"
+            tabindex="-1"
+            onclick="document.getElementById('file-input').click();"
+          >
+            <i class="fa-solid fa-plus" style="margin-right: 4px"></i>
+            Select
+          </button>
+          <div
+            id="file-names"
+            style="
+              display: flex;
+              flex-direction: column;
+              padding-top: 8px;
+              margin-left: 10px;
+              font-size: 14px;
+              width: 40%;
+            "
+          >
+            No file chosen
+          </div>
+          <button class="uk-button uk-button-default" onclick="uploadFiles()">
+            <i
+              class="fa-solid fa-arrow-up-from-bracket"
+              style="margin-right: 4px"
+            ></i>
+            Upload
+          </button>
+        </div>
+        <br />
+        <h1 class="uk-heading-small" style="margin-left: 8px">
+          Available Songs
+        </h1>
+
+        <div class="uk-overflow-auto">
+          <table
+            class="uk-table uk-table-middle uk-table-divider uk-table-hover"
+          >
+            <thead>
+              <tr>
+                <th class="uk-width-1-2">Title</th>
+                <th class="uk-width-small">Date added</th>
+                <th class="uk-table-expand">Length</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for file in files %}
+              <tr
+                id="song-{{ file._id }}"
+                style="cursor: pointer"
+                onclick="chooseSong('{{ file.audioUrl }}', '{{ file.filename }}', '{{ file.length }}', '{{ file.lengthFloat }}')"
+              >
+                <td
+                  id="song-name-{{ file._id }}"
+                  class="uk-text-nowrap uk-flex"
+                  style="align-items: center"
+                >
+                  {{ file.filename }}
+                  <uk-icon
+                    uk-tooltip="title: Edit song's name"
+                    custom-class="uk-margin-small-left"
+                    icon="pen"
+                    onclick="onUpdateSongNameButtonClick('{{ file._id }}')"
+                  ></uk-icon>
+                </td>
+                <td id="added-date-{{file._id}}" class="uk-text-nowrap">
+                  {{ file.uploadDate }}
+                </td>
+                <td class="uk-text-nowrap">{{ file.length }}</td>
+                <td>
+                  <uk-icon
+                    uk-tooltip="title: Remove song"
+                    custom-class="uk-margin-small-right"
+                    icon="trash"
+                    onclick="deleteSong('{{ file._id }}')"
+                  ></uk-icon>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div
+      class="uk-container uk-container-large uk-flex"
+      style="
+        width: 100vw;
+        padding: 0px;
+        margin: 32px !important;
+        justify-self: center;
+        justify-content: space-between;
+        align-items: center;
+      "
+    >
+      <div id="song-name" style="text-overflow: ellipsis">
+        Your song's name will be displayed here
+      </div>
+      <div
+        style="
+          width: 25%;
+          align-items: center;
+          padding-top: 8px;
+          position: absolute;
+          left: 38%;
+        "
+        class="uk-flex uk-flex-center uk-flex-column"
+      >
+        <div>
+          <i
+            id="play-button"
+            style="display: block; height: 16px"
+            class="fa-solid fa-circle-play fa-2xl"
+            onclick="togglePlay()"
+          ></i>
+          <i
+            id="pause-button"
+            style="display: none; height: 16px"
+            class="fa-solid fa-circle-pause fa-2xl"
+            onclick="togglePause()"
+          ></i>
+        </div>
+        <audio preload="auto"></audio>
+        <div
+          style="
+            display: flex;
+            flex-direction: row;
+            justify-items: center;
+            margin-top: 0px;
+          "
+        >
+          <span id="current-time"></span>
+          <progress
+            id="progressbar"
+            style="
+              width: 300px;
+              margin: 12px 8px 0 !important;
+              height: 4px !important;
+            "
+            class="uk-progress"
+            value="0"
+            max="100"
+          ></progress>
+          <span id="song-duration"></span>
+        </div>
+      </div>
+      <div>
+        <input
+          id="volume-slider"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="1"
+          style="margin-left: 10px; width: 100px"
+        />
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  var currSongLength;
+
+  const audio = document.querySelector("audio");
+  const volumeSlider = document.getElementById("volume-slider");
+  const playButton = document.getElementById("play-button");
+  const pauseButton = document.getElementById("pause-button");
+  const songName = document.getElementById("song-name");
+
+  function updateSliderBackground(slider) {
+    const percentage = slider.value * 100;
+    slider.style.background = `linear-gradient(
+            to right,
+            hsl(var(--foreground)) ${percentage}%,
+            hsl(var(--primary) / .2) ${percentage}%
+        )`;
+  }
+  updateSliderBackground(volumeSlider);
+  volumeSlider.addEventListener("input", (e) => {
+    const volume = e.target.value;
+    updateSliderBackground(e.target);
+    audio.volume = volume;
+  });
+
+  function formatDuration(seconds) {
+    const minutes = Math.floor(seconds / 60); // Get whole minutes
+    const remainingSeconds = Math.floor(seconds % 60); // Get remaining seconds
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  }
+
+  function chooseSong(audioUrl, fileName, fileLength, lengthFLoat) {
+    audio.src = audioUrl;
+    audio.load();
+
+    setTimeout(() => {
+      togglePlay();
+      songName.textContent = fileName;
+
+      const songDuration = document.getElementById("song-duration");
+      songDuration.textContent = fileLength;
+      currSongLength = lengthFLoat * 60;
+      audio.volume = 1;
+    }, 1000);
+  }
+
+  function togglePlay() {
+    if (audio.paused) {
+      audio.play();
+      playButton.style.display = "none";
+      pauseButton.style.display = "block";
+    }
+  }
+
+  function togglePause() {
+    if (!audio.paused) {
+      audio.pause();
+      playButton.style.display = "block";
+      pauseButton.style.display = "none";
+    }
+  }
+
+  function changeTimelinePosition() {
+    const progressBar = document.getElementById("progressbar");
+    const currentTime = document.getElementById("current-time");
+
+    const percentagePosition = (audio.currentTime / currSongLength) * 100;
+    currentTime.textContent = formatDuration(audio.currentTime);
+
+    progressBar.value = percentagePosition;
+    if (progressBar.value >= progressBar.max) {
+      progressBar.value = 0;
+    }
+  }
+
+  audio.ontimeupdate = changeTimelinePosition;
+
+  function audioEnded() {
+    playButton.style.display = "block";
+    pauseButton.style.display = "none";
+  }
+
+  audio.onended = audioEnded;
+
+  document.getElementById("file-input").addEventListener("change", function () {
+    const fileList = Array.from(this.files); // Get the selected files
+    const fileNamesContainer = document.getElementById("file-names");
+    fileNamesContainer.style.paddingTop = "0px";
+    // Clear existing file names
+    fileNamesContainer.innerHTML = "";
+
+    if (fileList.length !== 0) {
+      // Add each file name to the list
+      fileList.forEach((file) => {
+        const listItem = document.createElement("ul");
+        listItem.textContent = file.name;
+        fileNamesContainer.appendChild(listItem);
+      });
+    }
+  });
+
+  function uploadFiles() {
+    const files = document.getElementById("file-input").files;
+    if (files.length === 0) {
+      // alert("No files selected!");
+      return;
+    }
+
+    const formData = new FormData(); // Create FormData object
+    Array.from(files).forEach((file) => {
+      formData.append("files", file); // Append each file to FormData
+    });
+
+    // Make an AJAX request to submit the files
+    fetch("/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        if (!response.ok) alert("Failed to upload files.");
+        window.location.reload();
+      })
+      .catch((error) => {
+        alert("Failed to upload files.");
+        // console.error("Upload error:", error);
+      });
+  }
+
+  function onUpdateSongNameButtonClick(fileId) {
+    event.stopPropagation();
+    const songNameElement = document.getElementById(`song-name-${fileId}`);
+    if (!songNameElement) return;
+    const newSongNameElement = `
+      <td
+        id="song-name-${fileId}" 
+        class="uk-text-nowrap uk-flex"
+        style="align-items: center"
+      >
+        <input 
+          id="name-input-${fileId}"
+          class="uk-input" 
+          type="text" 
+          value=${songNameElement.innerText}
+        />
+        <uk-icon
+          id="check-button-${fileId}"
+          custom-class="uk-margin-small-left"
+          icon="check"
+        ></uk-icon>
+        <uk-icon
+          id="cancel-button-${fileId}" 
+          custom-class="uk-margin-small-left"
+          icon="x"
+          
+        ></uk-icon>
+      </td>
+      
+
+    `;
+
+    songNameElement.outerHTML = newSongNameElement;
+
+    const inputElement = document.getElementById(`name-input-${fileId}`);
+    if (inputElement) {
+      inputElement.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+    }
+
+    const checkIconElement = document.getElementById(`check-button-${fileId}`);
+    if (checkIconElement) {
+      checkIconElement.addEventListener("click", function () {
+        updateSongName(fileId);
+      });
+    }
+
+    const cancelIconElement = document.getElementById(
+      `cancel-button-${fileId}`
+    );
+    if (cancelIconElement) {
+      cancelIconElement.addEventListener("click", function () {
+        cancelUpdateSongName(fileId, songNameElement);
+      });
+    }
+  }
+
+  function cancelUpdateSongName(fileId, originalSongNameElement) {
+    event.stopPropagation();
+    const songNameElement = document.getElementById(`song-name-${fileId}`);
+    if (!songNameElement) return;
+    songNameElement.replaceWith(originalSongNameElement);
+  }
+
+  function updateSongName(fileId) {
+    event.stopPropagation();
+    const inputElement = document.getElementById(`name-input-${fileId}`);
+    if (!inputElement) return;
+
+    $.ajax({
+      url: "/updateSongName/" + fileId,
+      type: "PUT",
+      contentType: "application/json",
+      data: JSON.stringify({
+        new_song_name: inputElement.value,
+      }),
+      success: function () {
+        window.location.reload();
+        // alert("Attendance updated successfully!");
+      },
+      error: function (err) {
+        alert("Failed to update song's name.");
+      },
+    });
+  }
+
+  function deleteSong(fileId) {
+    if (confirm("Are you sure you want to delete this song?")) {
+      fetch(`/delete/${fileId}`, {
+        method: "DELETE",
+      })
+        .then((response) => {
+          if (response.ok) {
+            // Reload the page or remove the deleted item from the DOM
+            window.location.reload(); // or you could remove the element without reloading
+          } else {
+            alert("Failed to delete the song.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting song:", error);
+          alert("An error occurred. Please try again.");
+        });
+    }
+  }
+</script>
