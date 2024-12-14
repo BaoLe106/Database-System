@@ -14,4 +14,17 @@ Department: 4th year student of Mechanical Engineering Department (NTUST)
 
 [HW2 video](https://youtu.be/LbTDTDxrDuk)
 
+## Homework 3
+[HW3 folder](https://github.com/BaoLe106/Database-System/tree/main/HW3)
+
+[HW3 video](https://youtu.be/sWlXX0-KCPE)
+
+## Homework 4
+[HW4 folder](https://github.com/BaoLe106/Database-System/tree/main/HW4)
+
+[HW4 video](https://youtu.be/TQqMogojkiI)
+
 ## Final Project
+[Final Project folder](https://github.com/BaoLe106/Database-System/tree/main/FINAL)
+
+[Final Project video](https://youtu.be/UwF6M6OOnwY)
