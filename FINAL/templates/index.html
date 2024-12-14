@@ -73,7 +73,29 @@
         class="uk-width-1-4 uk-card uk-margin-top uk-card-body uk-card-default"
         style="min-height: 85vh; margin-right: 8px"
       >
-        <div class="uk-inline">
+        <ul class="uk-nav-default" uk-nav>
+          <li class="uk-flex" style="align-items: center">
+            <button
+              class="uk-icon-button uk-icon-button-small uk-icon-button-outline"
+              style="margin-right: 8px"
+            >
+              <uk-icon icon="circle-user-round" uk-cloak></uk-icon>
+            </button>
+            <div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+              <ul class="uk-dropdown-nav uk-nav">
+                <li><a href="/api/logout">Logout</a></li>
+              </ul>
+            </div>
+            <h1 class="uk-h3" style="color: white">{{ user.username }}</h1>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="uk-width-3-4 uk-card uk-margin-top uk-card-body uk-card-default"
+        style="min-height: 85vh"
+      >
+        <div class="uk-flex" style="justify-content: space-between">
+          <h1 class="uk-h4" style="margin-bottom: 8px">Upload Music</h1>
           <button
             class="uk-icon-button uk-icon-button-small uk-icon-button-outline"
           >
@@ -87,47 +109,6 @@
             <uk-theme-switcher></uk-theme-switcher>
           </div>
         </div>
-        <ul class="uk-nav-default" uk-nav>
-          <li class="uk-active">
-            <a>
-              <h1 class="uk-h3">{{ user.username }}</h1>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <uk-icon
-                custom-class="uk-margin-small-right"
-                icon="table"
-              ></uk-icon>
-              Item
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <uk-icon
-                custom-class="uk-margin-small-right"
-                icon="bell"
-              ></uk-icon>
-              Item
-            </a>
-          </li>
-          <!-- <li class="uk-nav-divider"></li> -->
-          <li>
-            <a href="#">
-              <uk-icon
-                custom-class="uk-margin-small-right"
-                icon="trash"
-              ></uk-icon>
-              Item
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div
-        class="uk-width-3-4 uk-card uk-margin-top uk-card-body uk-card-default"
-        style="min-height: 85vh"
-      >
-        <h1 class="uk-h4" style="margin-bottom: 8px">Upload Music</h1>
 
         <div class="js-upload" uk-form-custom style="display: flex">
           <input

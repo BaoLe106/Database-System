@@ -66,6 +66,11 @@ def apiLogin():
     
     return jsonify({"error": "Wrong username or password"}), 400
 
+@app.route("/api/logout")
+def logout():
+    session["user"] = None
+    return redirect("/login")
+
 @app.route('/')
 def index():
     user = session.get('user')
