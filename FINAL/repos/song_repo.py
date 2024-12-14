@@ -1,9 +1,9 @@
-def add_new_song(db_conn, file_uuid, user_id):
+def add_new_song(db_conn, records):
 	try:
 		cur = db_conn.cursor(dictionary=True)
 
 		post_query = 'INSERT INTO songs (id, user_id) VALUES (%s, %s)'
-		cur.execute(post_query, (str(file_uuid), user_id,))
+		cur.executemany(post_query, records)
 		db_conn.commit()
 
 		return True, None

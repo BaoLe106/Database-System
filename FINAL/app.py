@@ -60,7 +60,7 @@ def apiLogin():
     user = login(db_conn, username, password)
     if user:
         session.permanent = True
-        session['user'] = {"id": user['id'], "username": user['username']}
+        session["user"] = {"id": user['id'], "username": user['username']}
         return '', 201
         
     
@@ -96,14 +96,17 @@ def upload():
     db_conn = get_db_connection()
     user = session.get('user')
     try: 
+        records = []
         for file in request.files.getlist('files'):
             if file and file.filename:
                 file_id = fs.put(file, filename=file.filename)
                 file_uuid = uuid.UUID(bytes=file_id.binary + b'\x00\x00\x00\x00')
+                records.append((str(file_uuid), user['id']))
                 
-                res, error_msg = add_new_song(db_conn, file_uuid, user['id'])
-                if (res != True):
-                    raise Exception(error_msg)
+
+        res, error_msg = add_new_song(db_conn, records)
+        if (res != True):
+            raise Exception(error_msg)
     except Exception as err:
         print("debug err in upload song", err)
         abort(400, description="File cannot upload")
