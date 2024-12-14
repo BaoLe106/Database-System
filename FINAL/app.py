@@ -10,7 +10,7 @@ from datetime import datetime
 import tempfile
 from db.db import get_db_connection
 from repos.auth_repo import register, login
-from repos.song_repo import add_new_song, get_songs_by_user_id
+from repos.song_repo import add_new_song, get_songs_by_user_id, delete_song_by_song_id
 
 CACHE_DIR = tempfile.mkdtemp()
 print(f"Temporary cache directory: {CACHE_DIR}")
@@ -153,7 +153,14 @@ def stream(file_id):
 @app.route('/delete/<file_id>', methods=['DELETE'])
 def delete_song(file_id):
     try:
+        db_conn = get_db_connection()
+        song_id = str(uuid.UUID(bytes=ObjectId(file_id).binary + b'\x00\x00\x00\x00'))
+        res, error_msg = delete_song_by_song_id(db_conn, song_id)
+        if (res != True):
+            raise Exception("Error delete song")
+        
         fs.delete(ObjectId(file_id))
+        
         return '', 204
     except Exception as e:
         print("Error deleting file:", e)

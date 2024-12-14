@@ -29,3 +29,19 @@ def get_songs_by_user_id(db_conn, user_id):
 		if db_conn.is_connected():
 			cur.close()
 			db_conn.close()
+
+def delete_song_by_song_id(db_conn, song_id):
+	try:
+		cur = db_conn.cursor(dictionary=True)
+
+		delete_song_query_by_song_id = 'DELETE FROM songs WHERE id = %s'
+		cur.execute(delete_song_query_by_song_id, (song_id,))
+		db_conn.commit()
+		
+		return True, None
+	except Exception as err:
+		return False, err
+	finally:
+		if db_conn.is_connected():
+			cur.close()
+			db_conn.close()
