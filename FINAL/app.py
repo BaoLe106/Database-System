@@ -1,4 +1,4 @@
-from flask import Flask, session, render_template, request, Response, jsonify, redirect, url_for, abort
+from flask import Flask, session, render_template, request, Response, jsonify, redirect, abort
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from datetime import timedelta

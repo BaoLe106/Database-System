@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response, redirect, url_for, send_file, abort
+from flask import Flask, render_template, request, Response, abort
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from gridfs import GridFS
