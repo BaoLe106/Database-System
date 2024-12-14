@@ -4,8 +4,6 @@
 
 #### Student ID: B11035006 (NTUST)
 
-## Short Demo
-
 ## Video
 
-[HW4 video]()
+[HW4 video](https://youtu.be/TQqMogojkiI)
